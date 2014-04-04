@@ -31,7 +31,7 @@
 #include <introspection/introspection.h>
 #include <introspection/message_expansion.h>
 
-#include <dlfcn.h>
+#include <introspection/dlfcn.h>
 
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
@@ -281,7 +281,7 @@ namespace cpp_introspection {
       dlclose(library);
       return PackagePtr();
     }
-    PackagePtr package __attribute__((unused)) = (*load_fcn)();
+    PackagePtr package = (*load_fcn)();
 
     ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Successfully loaded cpp_introspection library " << path);
     g_loaded_libraries.push_back(path.filename().string());

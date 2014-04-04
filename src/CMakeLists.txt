@@ -1,5 +1,6 @@
-add_library(cpp_introspection SHARED introspection.cpp types.cpp)
-target_link_libraries(cpp_introspection dl ${Boost_FILESYSTEM_LIBRARY} ${catkin_LIBRARIES})
+find_package(Boost REQUIRED COMPONENTS filesystem)
+add_library(cpp_introspection SHARED introspection.cpp types.cpp dlfcn.cpp)
+target_link_libraries(cpp_introspection ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 install(TARGETS cpp_introspection DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
 option(BUILD_TEST "If true, some introspection libraries for std_msgs and a small test executable is built." OFF)
