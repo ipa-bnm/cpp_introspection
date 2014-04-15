@@ -42,7 +42,7 @@ template class MessageTemplate< ::@package@::@message@ >;
 namespace @package@ {
 namespace @message@ {
 
-  class Introspection : public MessageTemplate< ::@package@::@message@ > {
+  class __declspec(dllexport) Introspection : public MessageTemplate< ::@package@::@message@ > {
   protected:
 //    const Package& package_;
     V_Field fields_;

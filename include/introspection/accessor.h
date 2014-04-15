@@ -67,7 +67,7 @@ namespace cpp_introspection {
     }
     virtual ~Accessor() {}
 
-    bool hasInstance() const { return instance_.get(); }
+    bool hasInstance() const { return (instance_.get() != NULL) ? true : false; }
     VoidPtr getInstance() const { return is_const::value ? VoidPtr() : boost::const_pointer_cast<void>(getConstInstance()); }
     VoidConstPtr getConstInstance() const { return boost::shared_static_cast<void const>(instance_); }
 

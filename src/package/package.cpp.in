@@ -35,7 +35,7 @@
 namespace cpp_introspection {
 namespace @package@ {
 
-  class Introspection : public Package {
+  class __declspec(dllexport) Introspection : public Package {
   public:
     Introspection();
     const char *getName() const;

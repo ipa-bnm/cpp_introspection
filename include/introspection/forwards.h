@@ -63,7 +63,13 @@ namespace cpp_introspection {
   typedef std::map<std::string,FieldWPtr> M_Field;
   typedef std::map<std::string,TypeWPtr> M_Type;
 
-  struct CompareTypeInfo { bool operator()(const std::type_info *t1, const std::type_info *t2) const { return (*t1).before(*t2); } };
+  struct CompareTypeInfo 
+  {
+	bool operator()(const std::type_info *t1, const std::type_info *t2) const
+	{
+		return (bool)((*t1).before(*t2));
+	}
+  };
   typedef std::map<const std::type_info *,MessageWPtr,CompareTypeInfo> M_TypeInfo_Message;
 
   typedef boost::shared_ptr<void> VoidPtr;

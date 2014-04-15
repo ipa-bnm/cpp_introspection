@@ -58,11 +58,13 @@ endif()
 
 # Find and iterate through dependent packages
 if(NOT DEFINED ${package}_MSG_DEPENDENCIES)
-  execute_process(
-    COMMAND rospack depends ${package}
-    OUTPUT_VARIABLE ${package}_MSG_DEPENDENCIES
-    RESULT_VARIABLE _result
-  )
+  #execute_process(
+  #  COMMAND type "deps/std_msgs_dep.txt"
+  #  OUTPUT_VARIABLE ${package}_MSG_DEPENDENCIES
+  #  RESULT_VARIABLE _result
+  #)
+  FILE(READ "deps/${package}_dep.txt" ${package}_MSG_DEPENDENCIES)
+  #message(SEND_ERROR ${${package}_MSG_DEPENDENCIES})
   if(NOT ${_result} EQUAL 0)
     message(SEND_ERROR "Could not get package dependencies for package ${package}.")
     return()

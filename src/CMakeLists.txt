@@ -1,5 +1,5 @@
 find_package(Boost REQUIRED COMPONENTS filesystem)
-add_library(cpp_introspection SHARED introspection.cpp types.cpp dlfcn.cpp)
+add_library(cpp_introspection STATIC introspection.cpp types.cpp dlfcn.cpp)
 target_link_libraries(cpp_introspection ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 install(TARGETS cpp_introspection DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 

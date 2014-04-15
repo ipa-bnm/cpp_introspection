@@ -38,7 +38,7 @@ namespace @package@ {
 namespace @message@ {
 namespace fields {
 
-class Field_@field@ : public Field {
+class __declspec(dllexport) Field_@field@ : public Field {
 private:
   const Message& message_;
 

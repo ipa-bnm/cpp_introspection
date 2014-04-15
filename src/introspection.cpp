@@ -238,7 +238,7 @@ namespace cpp_introspection {
   {
     PackagePtr p = package(package_name);
     if (p) return p;
-    return load("libintrospection_" + package_name + ".so");
+    return load("libintrospection_" + package_name + ".dll");
   }
 
   using namespace boost::filesystem;
@@ -255,7 +255,7 @@ namespace cpp_introspection {
       return PackagePtr();
     }
 
-    if (path.extension() != ".so") {
+    if (path.extension() != ".dll") {
       loadPackage(package_or_library_or_path);
       return PackagePtr();
     }
