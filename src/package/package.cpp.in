@@ -64,6 +64,6 @@ namespace @package@ {
 } // namespace cpp_introspection
 
 using namespace cpp_introspection;
-extern "C" PackagePtr cpp_introspection_load_package() {
+extern "C" __declspec(dllexport) PackagePtr cpp_introspection_load_package() {
   return ::cpp_introspection::@package@::Load();
 }
