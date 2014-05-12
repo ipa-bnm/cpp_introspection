@@ -32,6 +32,7 @@
 #include <introspection/message_expansion.h>
 
 #include <introspection/dlfcn.h>
+#include <iostream>
 
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
@@ -238,12 +239,14 @@ namespace cpp_introspection {
   {
     PackagePtr p = package(package_name);
     if (p) return p;
-    return load("libintrospection_" + package_name + ".dll");
+    return load("introspection_" + package_name + ".dll");
   }
 
   using namespace boost::filesystem;
   PackagePtr load(const std::string& package_or_library_or_path)
   {
+	  std::cout << "In load(" << package_or_library_or_path << ")" << std::endl;
+
     path path(package_or_library_or_path);
     if (is_directory(path)) {
       ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Searching directory " << path << "...");
@@ -260,6 +263,7 @@ namespace cpp_introspection {
       return PackagePtr();
     }
     ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Loading " << path << "...");
+    std::cout << "Loading lib " << path << "..." << std::endl;
 
     if (std::find(g_loaded_libraries.begin(), g_loaded_libraries.end(), path.filename()) != g_loaded_libraries.end()) {
       ROS_WARN_STREAM_NAMED(ROS_PACKAGE_NAME, "library " << path << " already loaded");
@@ -270,6 +274,7 @@ namespace cpp_introspection {
     const char *error = dlerror();
     if (error || !library) {
       ROS_ERROR("%s", error);
+      std::cout << "Error opening library " << library << ": " << error << std::endl;
       return PackagePtr();
     }
 
@@ -278,6 +283,7 @@ namespace cpp_introspection {
     error = dlerror();
     if (error || !load_fcn) {
       ROS_WARN_NAMED(ROS_PACKAGE_NAME, "%s", error);
+      std::cout << "Error finding function 'cpp_introspection_load_package' in " << library << std::endl;
       dlclose(library);
       return PackagePtr();
     }
@@ -285,6 +291,8 @@ namespace cpp_introspection {
 
     ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Successfully loaded cpp_introspection library " << path);
     g_loaded_libraries.push_back(path.filename().string());
+
+    std::cout << "Successfully loaded cpp_introspection library " << path << std::endl;
 
 //      for(Package::const_iterator it = package->begin(); it != package->end(); ++it) {
 //        ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Package " << package->getName() << " contains message " << (*it)->getName() << ":");
