@@ -30,7 +30,9 @@
 #include <introspection/field.h>
 #include <introspection/accessor.h>
 #include <introspection/package.h>
+#include <introspection/introspection.h>
 #include <@package@/@message@.h>
+#include <introspection/globals.h>
 
 @_field_includes@
 
@@ -81,6 +83,7 @@ namespace @message@ {
   }
 
   MessagePtr Instance() {
+//	  std::cout << "In @package@/@message@::Instance() (map@" << &(rosmatlab_globals::g_messages_by_name) << ")" << std::endl;
     MessagePtr instance = messageByDataType("@package@/@message@");
     if (!instance) instance.reset(new Introspection());
     return instance;

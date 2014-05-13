@@ -30,6 +30,7 @@
 #define CPP_INTROSPECTION_PACKAGE_H
 
 #include <introspection/forwards.h>
+#include <introspection/globals.h>
 
 namespace cpp_introspection {
 
@@ -44,6 +45,7 @@ namespace cpp_introspection {
 
     virtual const char *getName() const = 0;
     std::vector<std::string> getMessages() const;
+    V_Message getMessageObjects() const;
 
     virtual const V_Message& fields() const { return messages_; }
     MessagePtr message(const std::string& message) const;

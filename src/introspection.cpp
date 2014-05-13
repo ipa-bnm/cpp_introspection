@@ -39,12 +39,12 @@
 
 namespace cpp_introspection {
 
-  static M_Package g_packages;
-  static V_Package g_repository;
-  static M_Message g_messages_by_name;
-  static M_Message g_messages_by_md5sum;
-  static M_TypeInfo_Message g_messages_by_typeid;
-  static V_string g_loaded_libraries;
+   M_Package g_packages;
+   V_Package g_repository;
+   M_Message g_messages_by_name;
+   M_Message g_messages_by_md5sum;
+   M_TypeInfo_Message g_messages_by_typeid;
+   V_string g_loaded_libraries;
 
   PackagePtr package(const std::string& pkg)
   {
@@ -58,9 +58,13 @@ namespace cpp_introspection {
 
   MessagePtr messageByDataType(const std::string& data_type, const std::string& package)
   {
+	  std::cout << "In messageByDataType(" << data_type << "), map@" << &g_messages_by_name << ", " << g_messages_by_name.size() << " entries" << std::endl;
+//	  std::cout << g_messages_by_name.size() << " messages in map@" << &g_messages_by_name << std::endl;
+//	  std::cout << "Getting message " << data_type << " by data type" << std::endl;
     if (!package.empty()) return messageByDataType(package + "/" + data_type);
     if (data_type == "Header") return g_messages_by_name[ros::message_traits::datatype<std_msgs::Header>()].lock();
     if (!g_messages_by_name.count(data_type)) return MessagePtr();
+    std::cout << "Got it!" << std::endl;
     return g_messages_by_name[data_type].lock();
   }
 
@@ -90,6 +94,11 @@ namespace cpp_introspection {
       messages.push_back((*it)->getName());
 
     return messages;
+  }
+
+  V_Message Package::getMessageObjects() const
+  {
+	return messages_;
   }
 
   MessagePtr Package::message(const std::string& message) const
@@ -245,13 +254,12 @@ namespace cpp_introspection {
   using namespace boost::filesystem;
   PackagePtr load(const std::string& package_or_library_or_path)
   {
-	  std::cout << "In load(" << package_or_library_or_path << ")" << std::endl;
 
     path path(package_or_library_or_path);
     if (is_directory(path)) {
-      ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Searching directory " << path << "...");
+//      ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Searching directory " << path << "...");
       for(directory_iterator entry(path); entry != directory_iterator(); ++entry) {
-        ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "  " << *entry << "...");
+//        ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "  " << *entry << "...");
         if (is_regular_file(entry->path())) load(entry->path().string());
       }
 
@@ -262,11 +270,10 @@ namespace cpp_introspection {
       loadPackage(package_or_library_or_path);
       return PackagePtr();
     }
-    ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Loading " << path << "...");
-    std::cout << "Loading lib " << path << "..." << std::endl;
+//    ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Loading " << path << "...");
 
     if (std::find(g_loaded_libraries.begin(), g_loaded_libraries.end(), path.filename()) != g_loaded_libraries.end()) {
-      ROS_WARN_STREAM_NAMED(ROS_PACKAGE_NAME, "library " << path << " already loaded");
+//      ROS_WARN_STREAM_NAMED(ROS_PACKAGE_NAME, "library " << path << " already loaded");
       return PackagePtr();
     }
 
@@ -274,25 +281,34 @@ namespace cpp_introspection {
     const char *error = dlerror();
     if (error || !library) {
       ROS_ERROR("%s", error);
-      std::cout << "Error opening library " << library << ": " << error << std::endl;
       return PackagePtr();
     }
 
-    typedef PackagePtr (*LoadFunction)();
+    typedef PackagePtr (*LoadFunction)(M_Message*);
     LoadFunction load_fcn = (LoadFunction) dlsym(library, "cpp_introspection_load_package");
     error = dlerror();
     if (error || !load_fcn) {
-      ROS_WARN_NAMED(ROS_PACKAGE_NAME, "%s", error);
-      std::cout << "Error finding function 'cpp_introspection_load_package' in " << library << std::endl;
+//      ROS_WARN_NAMED(ROS_PACKAGE_NAME, "%s", error);
       dlclose(library);
       return PackagePtr();
     }
-    PackagePtr package = (*load_fcn)();
+    std::cout << "The \"main\" map is at " << &g_messages_by_name << std::endl;
+    PackagePtr package = (*load_fcn)(&g_messages_by_name);
 
-    ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Successfully loaded cpp_introspection library " << path);
+    std::cout << "Back in the main app, the size of the map at " << &g_messages_by_name << " is " << g_messages_by_name.size() << std::endl;
+
+//    ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Successfully loaded cpp_introspection library " << path);
     g_loaded_libraries.push_back(path.filename().string());
 
-    std::cout << "Successfully loaded cpp_introspection library " << path << std::endl;
+    // Copy the messages inside of the package instances into the global array
+    std::cout << "Copying the member variable messages into the g_messages_by_name@" << &g_messages_by_name << "..." << std::endl;
+    const V_Message loaded_messages = package->getMessageObjects();
+    for (V_Message::const_iterator it=loaded_messages.begin(); it!=loaded_messages.end();++it) {
+//    	std::cout << "Copying " << ((*it)->getDataType()) << "..." << std::endl;
+//    	std::cout << g_messages_by_name.size() << " messages in the map" << std::endl;
+    	g_messages_by_name[(*it)->getDataType()] = *it;
+    }
+
 
 //      for(Package::const_iterator it = package->begin(); it != package->end(); ++it) {
 //        ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Package " << package->getName() << " contains message " << (*it)->getName() << ":");
