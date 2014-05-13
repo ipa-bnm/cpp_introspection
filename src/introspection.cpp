@@ -106,15 +106,15 @@ namespace cpp_introspection {
     return messageByDataType(std::string(getName()) + "/" + message);
   }
 
-  MessagePtr Package::add(const MessagePtr& message)
-  {
-    if (g_messages_by_name.count(message->getDataType())) return g_messages_by_name[message->getDataType()].lock();
-    messages_.push_back(message);
-    g_messages_by_name[message->getDataType()] = message;
-    g_messages_by_md5sum[message->getMD5Sum()] = message;
-    g_messages_by_typeid[&(message->getTypeId())] = message;
-    return message;
-  }
+//  MessagePtr Package::add(const MessagePtr& message)
+//  {
+//    if (g_messages_by_name.count(message->getDataType())) return g_messages_by_name[message->getDataType()].lock();
+//    messages_.push_back(message);
+//    g_messages_by_name[message->getDataType()] = message;
+//    g_messages_by_md5sum[message->getMD5Sum()] = message;
+//    g_messages_by_typeid[&(message->getTypeId())] = message;
+//    return message;
+//  }
 
   MessagePtr expand(const MessagePtr& message, const std::string &separator, const std::string &prefix)
   {
