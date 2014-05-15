@@ -30,7 +30,6 @@
 #define CPP_INTROSPECTION_PACKAGE_H
 
 #include <introspection/forwards.h>
-#include <introspection/globals.h>
 
 namespace cpp_introspection {
 
@@ -39,7 +38,11 @@ namespace cpp_introspection {
   protected:
     V_Message messages_;
 
+  private:
+    struct G_Vars * gvars_;
+
   public:
+    Package(struct G_Vars * gvars) : gvars_(gvars) {}
     virtual ~Package() {}
     static PackagePtr add(const PackagePtr& package);
 

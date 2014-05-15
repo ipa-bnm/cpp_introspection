@@ -158,8 +158,8 @@ foreach(message ${${package}_MSGS})
   configure_file(message.cpp.in ${message}/message.cpp @ONLY)
 
   list(APPEND introspection_${package}_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${message}/message.cpp)
-  set(_message_declarations "${_message_declarations}namespace ${message} { MessagePtr Instance(); }\n")
-  set(_message_initializers "${_message_initializers}    add(${message}::Instance());\n")
+  set(_message_declarations "${_message_declarations}namespace ${message} { MessagePtr Instance(struct G_Vars * gvars); }\n")
+  set(_message_initializers "${_message_initializers}    add(${message}::Instance(gvars));\n")
 endforeach()
 
 include_directories(${CATKIN_DEVEL_PREFIX}/include)

@@ -36,12 +36,23 @@
 
 namespace cpp_introspection {
 
-  extern M_Package g_packages;
-  extern V_Package g_repository;
-  extern M_Message g_messages_by_name;
-  extern M_Message g_messages_by_md5sum;
-  extern M_TypeInfo_Message g_messages_by_typeid;
-  extern V_string g_loaded_libraries;
+//  extern M_Package g_packages;
+//  extern V_Package g_repository;
+//  extern M_Message g_messages_by_name;
+//  extern M_Message g_messages_by_md5sum;
+//  extern M_TypeInfo_Message g_messages_by_typeid;
+//  extern V_string g_loaded_libraries;
+
+  struct G_Vars {
+	   M_Package g_packages;
+	   V_Package g_repository;
+	   M_Message g_messages_by_name;
+	   M_Message g_messages_by_md5sum;
+	   M_TypeInfo_Message g_messages_by_typeid;
+	   V_string g_loaded_libraries;
+  };
+
+  extern G_Vars * gvars;
 
   PackagePtr loadPackage(const std::string& package_name);
   PackagePtr load(const std::string& package_or_library_or_path);
