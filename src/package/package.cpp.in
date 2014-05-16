@@ -39,6 +39,7 @@ namespace @package@ {
   public:
     Introspection(struct G_Vars * gvars) : Package(gvars) {
     	std::cout << "in @package@::Introspection()" <<std::endl;
+    	::cpp_introspection::gvars = gvars;
     	@_dependent_initializers@
     	@_message_initializers@
     	std::cout << "First message points to " << &(*(messages_[0])) << std::endl;

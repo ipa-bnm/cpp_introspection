@@ -82,8 +82,9 @@ namespace @message@ {
   }
 
   MessagePtr Instance(struct G_Vars * gvars) {
-	  ::cpp_introspection::gvars = gvars;
+
 	  std::cout << "In @package@/@message@::Instance() (gvars@" << ::cpp_introspection::gvars << ")" << std::endl;
+	  ::cpp_introspection::gvars = gvars;
     MessagePtr instance = messageByDataType("@package@/@message@");
     if (!instance) instance.reset(new Introspection());
     return instance;
