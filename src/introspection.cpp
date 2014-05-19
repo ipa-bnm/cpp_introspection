@@ -26,6 +26,10 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
+/*
+ * Definition of functions and class member methods located in the cpp_introspection namespace
+ */
+
 #include <introspection/field.h>
 #include <introspection/type.h>
 #include <introspection/introspection.h>
@@ -39,18 +43,39 @@
 
 namespace cpp_introspection {
 
+   /*
+    * A pointer to a struct containing global variables.
+	* This had to be done this way since this file is
+	* "instantiated" by each DLL which refers to those
+	* global variables on Windows.
+	*/
    G_Vars * gvars;
 
+  /**
+   * Checks if a package has been loaded yet.
+   * @param pkg The name of the package whose existence is being checked.
+   * @return A PackagePtr to the package if the package has alrteady been loaded or an empty PackagePtr if the package hasn't been loaded yet.
+   */
   PackagePtr package(const std::string& pkg)
   {
     if (!gvars->g_packages.count(pkg)) return PackagePtr();
     return gvars->g_packages[pkg].lock();
   }
 
+  /**
+   * Returns the global vector in which every package is stored when loaded.
+   * @return A V_Package containing all loaded packages.
+   */
   const V_Package &packages() {
     return gvars->g_repository;
   }
 
+  /**
+   * Searches for the message with a specific data type and returns a MessagePtr.
+   * @param data_type The data type the message should have. Should look like this: <package>/<message_name>.
+   * @param package If not empty, it will be appended to data_type, specifying the package the message lies in.
+   * @return A MessagePtr pointing to the message instance specified by the data type, if the message has been loaded already. If the message hasn't been loaded yet, an empty MessagePtr.
+   */
   MessagePtr messageByDataType(const std::string& data_type, const std::string& package)
   {
     if (!package.empty()) return messageByDataType(package + "/" + data_type);
@@ -62,17 +87,32 @@ namespace cpp_introspection {
     return message;
   }
 
+  /**
+   * Searches for the message with a specific MD5 sum and returns a MessagePtr.
+   * @param md5sum The MD5 sum the message should have.
+   * @return A MessagePtr pointing to the message instance specified by the MD5 sum, if the message has been already loaded. If the message hasn't been loaded yet, an empty MessagePtr.
+   */
   MessagePtr messageByMD5Sum(const std::string& md5sum)
   {
     if (!gvars->g_messages_by_md5sum.count(md5sum)) return MessagePtr();
     return gvars->g_messages_by_md5sum[md5sum].lock();
   }
 
+  /**
+   * Searches for the message with a specific type info and returns a MessagePtr.
+   * @param type_info The type info the message should have.
+   * @return A MessagePtr pointing to the message instance specified by the type info, if the message has been loaded already. If the message hasn't been loaded yet, an empty MessagePtr.
+   */
   MessagePtr messageByTypeId(const std::type_info &type_info) {
     if (!gvars->g_messages_by_typeid.count(&type_info)) return MessagePtr();
     return gvars->g_messages_by_typeid[&type_info].lock();
   }
 
+  /**
+   * Adds a package to the global space, if it hasn't been added yet.
+   * @param package A PackagePtr pointing to the package that should be added.
+   * @return A PackagePtr pointing to the newly added package instance or, if the package has already been loaded, pointing to the already loaded package instance.
+   */
   PackagePtr Package::add(const PackagePtr& package)
   {
     if (gvars->g_packages.count(package->getName())) return gvars->g_packages[package->getName()].lock();
@@ -81,6 +121,11 @@ namespace cpp_introspection {
     return package;
   }
 
+  /**
+   * Used to get all names of the already loaded messages belonging to
+   * the package instance from which this method has been called.
+   * @return A std::vector containg the names of all loaded messages as std::string.
+   */
   std::vector<std::string> Package::getMessages() const
   {
     std::vector<std::string> messages;
@@ -90,16 +135,35 @@ namespace cpp_introspection {
     return messages;
   }
 
+  /**
+   * Used to get the loaded messages belonging to the package instance
+   * from which this method has been called. Has been added for debugging
+   * purposes only.
+   * @return A V_Message containing all message instances belonging to the caller package instance.
+   */
   V_Message Package::getMessageObjects() const
   {
 	return messages_;
   }
 
+  /**
+   * Searches globally for a message belonging to the calling package
+   * instance by its pure name. It auto-appends the package name to the
+   * message name and calls messageByDataType(std::string&).
+   * @param The pure name of the message without any package prefix.
+   * @return A MessagePtr pointing to the message instance if already loaded or an empty MessagePtr if the message hasn't been loaded already
+   */
   MessagePtr Package::message(const std::string& message) const
   {
     return messageByDataType(std::string(getName()) + "/" + message);
   }
 
+  /**
+   * Adds a message both to the local message vector of the calling
+   * package and to the global space, if not added already.
+   * param message A MessagePtr to the message instance that should be added.
+   * @return The given MessagePtr, if the message had not been added yet or a MessagePtr pointing to the already added message instance.
+   */
   MessagePtr Package::add(const MessagePtr & message) {
 
 	  if (gvars_->g_messages_by_name.count(message->getDataType()))
@@ -112,11 +176,17 @@ namespace cpp_introspection {
 
   }
 
+  /**
+   * Expands a message.
+   */
   MessagePtr expand(const MessagePtr& message, const std::string &separator, const std::string &prefix)
   {
     return MessagePtr(new ExpandedMessage(message, separator, prefix));
   }
 
+  /**
+   * Expands a message
+   */
   void ExpandedMessage::expand(const MessagePtr &message, const std::string& prefix) {
     for(Message::const_iterator i = message->begin(); i != message->end(); i++) {
       FieldPtr field = *i;
@@ -142,12 +212,27 @@ namespace cpp_introspection {
     }
   }
 
+  
+  /**
+   * "Frontend" for Message::getFields(V_string&, bool, const std::string&, const std::string&)
+   * @param expand Whether the message should be expanded.
+   * @param separator
+   * @param prefix 
+   * @return A std::vector containg the field names as std::string
+   */
   V_string Message::getFields(bool expand, const std::string& separator, const std::string& prefix) const
   {
     V_string fields;
     return getFields(fields, expand, separator, prefix);
   }
 
+  /**
+   * Gets the fields belonging to the calling message instance.
+   * @param expand Whether the message should be expanded.
+   * @param separator
+   * @param prefix 
+   * @return A std::vector containg the field names as std::string
+   */
   V_string& Message::getFields(V_string& fields, bool expand, const std::string& separator, const std::string& prefix) const
   {
     for(const_iterator it = begin(); it != end(); ++it) {
@@ -175,12 +260,18 @@ namespace cpp_introspection {
     return fields;
   }
 
+  /**
+   * Frontend for Message::getTypes(V_string&, bool)
+   */
   V_string Message::getTypes(bool expand) const
   {
     V_string types;
     return getTypes(types, expand);
   }
 
+  /**
+   * Gets the types of the calling message instance.
+   */
   V_string& Message::getTypes(V_string& types, bool expand) const
   {
     for(const_iterator it = begin(); it != end(); ++it) {
@@ -240,6 +331,10 @@ namespace cpp_introspection {
     return messageByTypeId(this->getTypeId());
   }
 
+  /**
+   * Tries to load the package and if it fails, calls load(std::string&).
+   * @param package_name The name of the package that should be loaded.
+   */
   PackagePtr loadPackage(const std::string &package_name)
   {
     PackagePtr p = package(package_name);
@@ -247,6 +342,12 @@ namespace cpp_introspection {
     return load("introspection_" + package_name + ".dll");
   }
 
+  /**
+   * Tries to load a package from the specified package or library
+   * or path.
+   * @param The name of a package, library or path.
+   * @return A PackagePtr pointing to the loaded package instance or an empty PackagePtr if the load process failed.
+   */
   using namespace boost::filesystem;
   PackagePtr load(const std::string& package_or_library_or_path)
   {

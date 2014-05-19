@@ -26,6 +26,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
+/*
+ * Gets generated for each package specified inside of the CMakeLists.txt.
+ * All contained elements will be exported to a DLL which is used when
+ * the package gets loaded via introspection::loadPackage(const std::string)
+ */
+
 #include <introspection/introspection.h>
 #include <introspection/package.h>
 #include <introspection/@package@/package.h>
@@ -38,7 +44,9 @@ namespace @package@ {
   class __declspec(dllexport) Introspection : public Package {
   public:
     Introspection(struct G_Vars * gvars) : Package(gvars) {
+//    	Setup the pointer to the global variable struct
     	::cpp_introspection::gvars = gvars;
+//    	Here all the messages are added
     	@_dependent_initializers@
     	@_message_initializers@
     }
@@ -49,6 +57,10 @@ namespace @package@ {
     return "@package@";
   }
 
+  /**
+   * Adds the package to the cpp_introspection space.
+   * @params A pointer to the cross-DLL-global variables struct.
+   */
   PackagePtr Load(struct G_Vars * gvars) {
     return Package::add(PackagePtr(new Introspection(gvars)));
   }
@@ -57,6 +69,12 @@ namespace @package@ {
 } // namespace cpp_introspection
 
 using namespace cpp_introspection;
+/**
+ * Entry function for the DLL which is used by
+ * introspection::loadPackage(const std::string).
+ * @param gvars A pointer to the global variables struct.
+ * @return A PackagePtr to the instantiated package.
+ */
 extern "C" __declspec(dllexport) PackagePtr cpp_introspection_load_package(struct G_Vars * gvars) {
 	return ::cpp_introspection::@package@::Load(gvars);
 }
