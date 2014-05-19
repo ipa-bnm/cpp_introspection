@@ -39,13 +39,6 @@
 
 namespace cpp_introspection {
 
-//   M_Package g_packages;
-//   V_Package g_repository;
-//   M_Message g_messages_by_name;
-//   M_Message g_messages_by_md5sum;
-//   M_TypeInfo_Message g_messages_by_typeid;
-//   V_string g_loaded_libraries;
-
    G_Vars * gvars;
 
   PackagePtr package(const std::string& pkg)
@@ -60,22 +53,12 @@ namespace cpp_introspection {
 
   MessagePtr messageByDataType(const std::string& data_type, const std::string& package)
   {
-	  std::cout << "In messageByDataType(" << data_type << "), gvars@" << gvars /*<< std::flush << ", " << gvars->g_messages_by_name.size() << " entries"*/ << std::endl;
-//	  std::cout << g_messages_by_name.size() << " messages in map@" << &g_messages_by_name << std::endl;
-//	  std::cout << "Getting message " << data_type << " by data type" << std::endl;
     if (!package.empty()) return messageByDataType(package + "/" + data_type);
     if (data_type == "Header") return gvars->g_messages_by_name[ros::message_traits::datatype<std_msgs::Header>()].lock();
     if (!gvars->g_messages_by_name.count(data_type)) {
-
-    	std::cout << "Messages in byname, size=" << cpp_introspection::gvars->g_messages_by_name.size() << std::endl;
-		for (cpp_introspection::M_Message::iterator it=cpp_introspection::gvars->g_messages_by_name.begin();it!=cpp_introspection::gvars->g_messages_by_name.end();++it) {
-			std::cout << it->first << "!=" << data_type << std::endl;
-		}
     	return MessagePtr();
-
     }
     MessagePtr message = gvars->g_messages_by_name[data_type].lock();
-    std::cout << "Got it message with datatype " << message->getDataType() << std::endl;
     return message;
   }
 
@@ -92,7 +75,6 @@ namespace cpp_introspection {
 
   PackagePtr Package::add(const PackagePtr& package)
   {
-	  std::cout << "in @package@::add()" <<std::endl;
     if (gvars->g_packages.count(package->getName())) return gvars->g_packages[package->getName()].lock();
     gvars->g_repository.push_back(package);
     gvars->g_packages[package->getName()] = package;
@@ -118,20 +100,8 @@ namespace cpp_introspection {
     return messageByDataType(std::string(getName()) + "/" + message);
   }
 
-//  MessagePtr Package::add(const MessagePtr& message)
-//  {
-//    if (g_messages_by_name.count(message->getDataType())) return g_messages_by_name[message->getDataType()].lock();
-//    messages_.push_back(message);
-//    g_messages_by_name[message->getDataType()] = message;
-//    g_messages_by_md5sum[message->getMD5Sum()] = message;
-//    g_messages_by_typeid[&(message->getTypeId())] = message;
-//    return message;
-//  }
-
   MessagePtr Package::add(const MessagePtr & message) {
 
-	  std::cout << "in package::add(" << message->getDataType() << ")" << std::endl;
-	  std::cout << "check size of global map in struct@" << gvars << ": " << gvars_->g_messages_by_name.size() << std::endl;
 	  if (gvars_->g_messages_by_name.count(message->getDataType()))
 		  return gvars_->g_messages_by_name[message->getDataType()].lock();
 	  messages_.push_back(message);
@@ -295,10 +265,8 @@ namespace cpp_introspection {
       loadPackage(package_or_library_or_path);
       return PackagePtr();
     }
-//    ROS_DEBUG_STREAM_NAMED(ROS_PACKAGE_NAME, "Loading " << path << "...");
 
     if (std::find(gvars->g_loaded_libraries.begin(), gvars->g_loaded_libraries.end(), path.filename()) != gvars->g_loaded_libraries.end()) {
-//      ROS_WARN_STREAM_NAMED(ROS_PACKAGE_NAME, "library " << path << " already loaded");
       return PackagePtr();
     }
 
@@ -313,37 +281,19 @@ namespace cpp_introspection {
     LoadFunction load_fcn = (LoadFunction) dlsym(library, "cpp_introspection_load_package");
     error = dlerror();
     if (error || !load_fcn) {
-//      ROS_WARN_NAMED(ROS_PACKAGE_NAME, "%s", error);
       dlclose(library);
       return PackagePtr();
     }
-    std::cout << "Calling the DLL function" << std::endl;
     PackagePtr package = (*load_fcn)(gvars);
 
-    std::cout << "Back in the main app, the size of gvars at " << gvars << " is " << gvars->g_messages_by_name.size() << std::endl;
-
-//    ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Successfully loaded cpp_introspection library " << path);
     gvars->g_loaded_libraries.push_back(path.filename().string());
 
     // Copy the messages inside of the package instances into the global array
-//    std::cout << "Copying the member variable messages into the g_messages_by_name@" << &g_messages_by_name << "..." << std::endl;
     const V_Message loaded_messages = package->getMessageObjects();
     for (V_Message::const_iterator it=loaded_messages.begin(); it!=loaded_messages.end();++it)
     {
-//    	std::cout << "Copying " << ((*it)->getDataType()) << "..." << std::endl;
-//    	std::cout << g_messages_by_name.size() << " messages in the map" << std::endl;
     	gvars->g_messages_by_name[(*it)->getDataType()] = *it;
     }
-
-
-//      for(Package::const_iterator it = package->begin(); it != package->end(); ++it) {
-//        ROS_INFO_STREAM_NAMED(ROS_PACKAGE_NAME, "Package " << package->getName() << " contains message " << (*it)->getName() << ":");
-//        V_string types = (*it)->getTypes();
-//        V_string names = (*it)->getFields();
-//        for(V_string::const_iterator it_type = types.begin(), it_name = names.begin(); it_type != types.end() && it_name != names.end(); ++it_type, ++it_name) {
-//          ROS_INFO("  %s %s", it_type->c_str(), it_name->c_str());
-//        }
-//      }
 
     return package;
   }

@@ -38,53 +38,25 @@ namespace @package@ {
   class __declspec(dllexport) Introspection : public Package {
   public:
     Introspection(struct G_Vars * gvars) : Package(gvars) {
-    	std::cout << "in @package@::Introspection()" <<std::endl;
     	::cpp_introspection::gvars = gvars;
     	@_dependent_initializers@
     	@_message_initializers@
-    	std::cout << "First message points to " << &(*(messages_[0])) << std::endl;
     }
     const char *getName() const;
-//  protected:
-//      MessagePtr add(const MessagePtr& message);
   };
-
-//  Introspection::Introspection(M_Message * messages_by_name) {
-//	  messages_by_name_ = messages_by_name;
-/*	  @_dependent_initializers@
-	  @_message_initializers@*/
-//  }
-
-//  MessagePtr Introspection::add(const MessagePtr & message) {
-//  	  if (messages_by_name_->count(message->getDataType()))
-//  		  return (*messages_by_name_)[message->getDataType()].lock();
-//  	  (*messages_by_name_)[message->getDataType()] = message;
-//  	  return message;
-//    }
 
   const char *Introspection::getName() const {
     return "@package@";
   }
 
   PackagePtr Load(struct G_Vars * gvars) {
-	  std::cout << "in @package@::Load()" <<std::endl;
     return Package::add(PackagePtr(new Introspection(gvars)));
   }
-
-//  PackagePtr Instance() {
-//    PackagePtr instance = package("@package@");
-//    if (!instance) instance = Load(0);
-//    return instance;
-//  }
 
 } // namespace @package@
 } // namespace cpp_introspection
 
 using namespace cpp_introspection;
 extern "C" __declspec(dllexport) PackagePtr cpp_introspection_load_package(struct G_Vars * gvars) {
-//	std::cout << "Got it. Given map lies at " << messages_by_name_ptr << ", size is " << messages_by_name_ptr->size() << std::endl;
-//	(*messages_by_name_ptr)["super"] = MessagePtr();
-//	std::cout << "Added entry. New size is " << messages_by_name_ptr->size() << std::endl;
-	std::cout << "in @package@ DLL entry function with gvars@" << gvars <<std::endl;
 	return ::cpp_introspection::@package@::Load(gvars);
 }

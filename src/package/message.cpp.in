@@ -45,13 +45,11 @@ namespace @message@ {
 
   class __declspec(dllexport) Introspection : public MessageTemplate< ::@package@::@message@ > {
   protected:
-//    const Package& package_;
     V_Field fields_;
     M_Field fields_by_name_;
     V_FieldName field_names_;
 
   public:
-//    Introspection(const Package& package);
     Introspection();
     virtual ~Introspection() {}
 
@@ -82,8 +80,6 @@ namespace @message@ {
   }
 
   MessagePtr Instance(struct G_Vars * gvars) {
-
-	  std::cout << "In @package@/@message@::Instance() (gvars@" << ::cpp_introspection::gvars << ")" << std::endl;
 	  ::cpp_introspection::gvars = gvars;
     MessagePtr instance = messageByDataType("@package@/@message@");
     if (!instance) instance.reset(new Introspection());
